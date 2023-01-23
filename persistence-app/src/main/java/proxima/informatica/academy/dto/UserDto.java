@@ -3,6 +3,11 @@ package proxima.informatica.academy.dto;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+/**
+ * 
+ * @author Giacomo Della Luna
+ *
+ */
 public class UserDto {
 	
 	private Integer id;

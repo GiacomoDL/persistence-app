@@ -8,15 +8,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import proxima.informatica.academy.dto.RoleDto;
 import proxima.informatica.academy.dto.UserDto;
 
+/**
+ * 
+ * @author Giacomo Della Luna
+ *
+ */
 public class DatabaseManagerSingleton {
 
-//	private final static Logger logger = LoggerFactory.getLogger(DatabaseManagerSingleton.class);
+	private final static Logger logger = LoggerFactory.getLogger(DatabaseManagerSingleton.class);
 
 	private DatabaseManagerSingleton() {
-//		logger.debug("Instanziato Costruttore Privato Database Manager Singleton");
+		logger.debug("Instanziato Costruttore Privato Database Manager Singleton");
 	}
 
 	private static DatabaseManagerSingleton instance;
@@ -54,7 +62,7 @@ public class DatabaseManagerSingleton {
 			}
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return userToReturn;
 	}
@@ -78,13 +86,13 @@ public class DatabaseManagerSingleton {
 			}
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return roleToReturn;
 	}
 	
 	public UserDto getUserByEmail(String email) {
-		UserDto userToReturn = null;
+		UserDto userToReturn = new UserDto();
 		
 		try {
 			Connection con = getConnection();
@@ -95,15 +103,21 @@ public class DatabaseManagerSingleton {
 			ResultSet rs = query.executeQuery();
 			
 			if (rs.next()) {
-				userToReturn = new UserDto();
 				userToReturn.setId(rs.getInt(1));
 				userToReturn.setEmail(rs.getString(2));
-				userToReturn.setFirstname(rs.getString(3));
-				userToReturn.setLastname(rs.getString(4));
+				userToReturn.setPassword(rs.getString(3));
+				userToReturn.setFirstname(rs.getString(4));
+				userToReturn.setLastname(rs.getString(5));
+				userToReturn.setDateofbirth(rs.getDate(6));
+				userToReturn.setRegdate(rs.getTimestamp(7));
+				userToReturn.setRole(rs.getInt(8));
+				userToReturn.setImgpath(rs.getString(9));
+				userToReturn.setNote(rs.getString(10));
+				userToReturn.setEnabled(rs.getBoolean(11));
 			}
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return userToReturn;
 	}
@@ -136,16 +150,47 @@ public class DatabaseManagerSingleton {
 			}
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return userToReturn;
 
 	}
 	
-	
+	public ArrayList<UserDto> getUsersByRole(int role) {
+		ArrayList<UserDto> listUsers = new ArrayList<UserDto>();
+
+		try {
+			Connection con = getConnection();
+
+			PreparedStatement query = con.prepareStatement("SELECT * FROM users WHERE role = ?");
+			query.setInt(1, role);
+
+			ResultSet rs = query.executeQuery();
+
+			while (rs.next()) {
+				UserDto user = new UserDto();
+				user.setId(rs.getInt(1));
+				user.setEmail(rs.getString(2));
+				user.setPassword(rs.getString(3));
+				user.setFirstname(rs.getString(4));
+				user.setLastname(rs.getString(5));
+				user.setDateofbirth(rs.getDate(6));
+				user.setRegdate(rs.getTimestamp(7));
+				user.setRole(rs.getInt(8));
+				user.setImgpath(rs.getString(9));
+				user.setNote(rs.getString(10));
+				user.setEnabled(rs.getBoolean(11));
+				listUsers.add(user);
+			}
+			con.close();
+		} catch (ClassNotFoundException | IOException | SQLException e) {
+			logger.error(e.getMessage());
+		}
+		return listUsers;
+
+	}
 
 	public int insertUser(UserDto user) {
-		System.out.println(user.toString());
 		Connection con;
 		int row = 0;
 		try {
@@ -166,8 +211,7 @@ public class DatabaseManagerSingleton {
 			row = query.executeUpdate();
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-
+			logger.error(e.getMessage());
 		}
 		return row;
 	}
@@ -187,8 +231,7 @@ public class DatabaseManagerSingleton {
 			row = query.executeUpdate();
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-
+			logger.error(e.getMessage());
 		}
 		return row;
 	}
@@ -220,8 +263,7 @@ public class DatabaseManagerSingleton {
 
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return listUsers;
 	}
@@ -247,14 +289,12 @@ public class DatabaseManagerSingleton {
 
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return listRoles;
 	}
 
 	public int updateUser(UserDto user) {
-		System.out.println(user.toString());
 		Connection con;
 		int row = 0;
 		try {
@@ -262,7 +302,6 @@ public class DatabaseManagerSingleton {
 			PreparedStatement query = con.prepareStatement(
 					"UPDATE users SET firstname = ?, lastname = ?, email = ?, password = ?, dateofbirth = ?, regdate = ?, role = ?, imgpath = ?, note = ?, enabled = ? WHERE id ="
 							+ user.getId());
-			System.out.println("Update id " + user.getId());
 			query.setString(1, user.getFirstname());
 			query.setString(2, user.getLastname());
 			query.setString(3, user.getEmail());
@@ -278,8 +317,7 @@ public class DatabaseManagerSingleton {
 
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return row;
 	}
@@ -299,8 +337,7 @@ public class DatabaseManagerSingleton {
 
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return row;
 	}
@@ -317,8 +354,7 @@ public class DatabaseManagerSingleton {
 			row = query.executeUpdate();
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return row;
 	}
@@ -335,8 +371,7 @@ public class DatabaseManagerSingleton {
 			row = query.executeUpdate();
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return row;
 	}
@@ -351,8 +386,7 @@ public class DatabaseManagerSingleton {
 			row = query.executeUpdate();
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		System.out.println(row);
 		return row;
@@ -368,8 +402,7 @@ public class DatabaseManagerSingleton {
 			row = query.executeUpdate();
 			con.close();
 		} catch (ClassNotFoundException | IOException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		System.out.println(row);
 		return row;

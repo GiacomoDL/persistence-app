@@ -3,9 +3,8 @@ package proxima.informatica.academy;
 import java.io.IOException;
 
 /**
- * Singleton manager class that provides to retrieve properties
  * 
- * @author maurizio.franco@ymail.com
+ * @author Giacomo Della Luna
  *
  */
 public class PropertiesManagerSingleton {

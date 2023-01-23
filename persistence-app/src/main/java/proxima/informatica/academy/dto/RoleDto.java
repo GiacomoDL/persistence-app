@@ -1,5 +1,10 @@
 package proxima.informatica.academy.dto;
 
+/**
+ * 
+ * @author Giacomo Della Luna
+ *
+ */
 public class RoleDto {
 
 	private Integer id;
